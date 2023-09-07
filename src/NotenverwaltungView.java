@@ -13,8 +13,9 @@ public class NotenverwaltungView extends JFrame {
     private final List<JSpinner> notenEingabe = new ArrayList<>();
     private final JLabel anzahlAnzeige = new JLabel();
     private final JLabel durchschnittAnzeige = new JLabel();
-    private final JButton speichernButton = new JButton("Speichern");
     private final JButton auswertenButton = new JButton("Auswerten");
+    private final JButton speichernButton = new JButton("Speichern");
+    private final JButton ladenButton = new JButton("Laden");
 
     public NotenverwaltungView() {
         setTitle("Notenverwaltung");
@@ -96,6 +97,7 @@ public class NotenverwaltungView extends JFrame {
         JPanel panel = new JPanel();
 
         panel.add(auswertenButton);
+        panel.add(ladenButton);
         panel.add(speichernButton);
         return panel;
     }
@@ -112,12 +114,50 @@ public class NotenverwaltungView extends JFrame {
         return datumTxt.getText();
     }
 
-    public List<JSpinner> getNotenEingabe() {
-        return notenEingabe;
+    public void setKlasse(String klasse) {
+        klasseTxt.setText(klasse);
+    }
+
+    public void setFach(String fach) {
+        fachTxt.setText(fach);
+    }
+
+    public void setDatum(String datum) {
+        datumTxt.setText(datum);
+    }
+
+    public List<Object> getNotenAnzahlen() {
+        List<Object> notenAnzahlen = new ArrayList<>();
+        for (JSpinner spinner : notenEingabe)
+        {
+            notenAnzahlen.add(spinner.getValue());
+        }
+
+        return notenAnzahlen;
+    }
+
+
+    public void setNotenAnzahlen(List<Integer> notenAnzahlen) {
+        for (int i = 0; i < notenEingabe.size(); i++)
+        {
+            notenEingabe.get(i).setValue(notenAnzahlen.get(i));
+        }
+    }
+
+    public void resetNotenEingabe()
+    {
+        for (JSpinner spinner : notenEingabe)
+        {
+            spinner.setValue(0);
+        }
     }
 
     public void setAuswertenAction(ActionListener listener) {
         auswertenButton.addActionListener(listener);
+    }
+
+    public void setLoadAction(ActionListener listener) {
+        ladenButton.addActionListener(listener);
     }
 
     public void setSaveAction(ActionListener listener) {
