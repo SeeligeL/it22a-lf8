@@ -1,6 +1,9 @@
 import javax.swing.*;
 import java.io.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class NotenverwaltungController {
@@ -15,9 +18,39 @@ public class NotenverwaltungController {
         aktualisiereView();
     }
 
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            NotenverwaltungController controller = new NotenverwaltungController();
+            controller.view.setVisible(true);
+        });
+    }
+
     private void aktualisiereView() {
-        view.setDurchschnitt(view.getDurchschnitt());
+        view.setDurchschnitt(calculateAverage());
         view.setAnzahlAnzeige(view.getAnzahl());
+    }
+
+    /**
+     * Berechnet den Notendurchschnitt einer Klassenarbeit auf eine Nachkommastelle genau.
+     * Berechnung: [Durchschnitt] = [Summe der Einzelnoten] / [Anzahl]
+     * @return Durchschnitt auf eine Nachkommastelle gerundet.
+     */
+    private Double calculateAverage() {
+        int anzahl = view.getAnzahl();
+        List<Integer> notenAnzahlen = view.getNotenAnzahlen();
+
+        if (anzahl == 0) {
+            return Double.NaN;
+        } else {
+            int summe = 0;
+
+            for (int i = 0; i < notenAnzahlen.size(); i++) {
+                int anzahlNote = notenAnzahlen.get(i);
+                anzahl += anzahlNote;
+                summe += (i + 1) * anzahlNote;
+            }
+            return Math.round(10.0 * summe / anzahl) / 10.0;
+        }
     }
 
     /**
@@ -32,12 +65,12 @@ public class NotenverwaltungController {
             writer.newLine();
             writer.write("Fach" + ", " + view.getFach());
             writer.newLine();
-            writer.write("Datum" + ", " + view.getDatum());
+            writer.write("Datum" + ", " + SimpleDateFormat.getDateInstance().format(view.getDatum()));
             writer.newLine();
             writer.newLine();
 
             for (int i = 0; i < view.getNotenAnzahlen().size(); i++) {
-                int count = (int) view.getNotenAnzahlen().get(i);
+                int count = view.getNotenAnzahlen().get(i);
                 writer.write("Note " + (i + 1) + "," + count);
                 writer.newLine();
             }
@@ -59,24 +92,22 @@ public class NotenverwaltungController {
 
             String line = reader.readLine();
 
-            while (line != null)
-            {
+            while (line != null) {
                 if (line.startsWith("Klasse, ")) {
                     String klasse = line.substring("Klasse, ".length()).trim();
                     view.setKlasse(klasse);
-                }
-                else if (line.startsWith("Fach, ")) {
+                } else if (line.startsWith("Fach, ")) {
                     String fach = line.substring("Fach, ".length()).trim();
                     view.setFach(fach);
-                }
-                else if (line.startsWith("Datum, ")) {
-                    String datum = line.substring("Datum, ".length()).trim();
-                    view.setDatum(datum);
-                }
-                else if (line.startsWith("Note")) {
+                } else if (line.startsWith("Datum, ")) {
+                    String dateString = line.substring("Datum, ".length()).trim();
+
+                    Date date = SimpleDateFormat.getDateInstance().parse(dateString); // Für den Moment einfach ignorieren!
+
+                    view.setDatum(date);
+                } else if (line.startsWith("Note")) {
                     List<Integer> notenAnzahlen = new ArrayList<>();
-                    while(line != null && line.startsWith("Note"))
-                    {
+                    while (line != null && line.startsWith("Note")) {
                         String anzahl = line.split(",")[1].trim();
                         notenAnzahlen.add(Integer.valueOf(anzahl));
                         line = reader.readLine();
@@ -86,7 +117,7 @@ public class NotenverwaltungController {
                 line = reader.readLine();
             }
             JOptionPane.showMessageDialog(null, "Notenspiegel wurde erfolgreich geladen.");
-        } catch (IOException e) {
+        } catch (IOException | ParseException e) {
             JOptionPane.showMessageDialog(null, "Fehler beim Laden der Datei: " + e.getMessage());
         }
     }
@@ -94,14 +125,7 @@ public class NotenverwaltungController {
     private void resetView() {
         view.setKlasse("");
         view.setFach("");
-        view.setDatum("");
+        view.setDatum(new Date());
         view.resetNotenEingabe();
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            NotenverwaltungController controller = new NotenverwaltungController();
-            controller.view.setVisible(true);
-        });
     }
 }

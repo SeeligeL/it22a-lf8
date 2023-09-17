@@ -1,15 +1,15 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class NotenverwaltungView extends JFrame {
 
     private final JTextField klasseTxt = new JTextField(5);
     private final JTextField fachTxt = new JTextField(8);
-    private final JFormattedTextField datumTxt = new JFormattedTextField(new SimpleDateFormat("dd.MM.yy"));
+    private final JSpinner datumSpn = new JSpinner(new SpinnerDateModel());
     private final List<JSpinner> notenEingabe = new ArrayList<>();
     private final JLabel anzahlAnzeige = new JLabel();
     private final JLabel durchschnittAnzeige = new JLabel();
@@ -20,7 +20,8 @@ public class NotenverwaltungView extends JFrame {
     public NotenverwaltungView() {
         setTitle("Notenverwaltung");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 320);
+        setMinimumSize(new Dimension(450, 320));
+        setResizable(false);
         setLayout(new BorderLayout());
 
         JPanel kopfPanel = createKopfPanel();
@@ -67,8 +68,8 @@ public class NotenverwaltungView extends JFrame {
 
         JPanel datumPanel = new JPanel();
         datumPanel.add(new JLabel("Datum:"));
-        datumTxt.setColumns(5);
-        datumPanel.add(datumTxt);
+        datumSpn.setEditor(new JSpinner.DateEditor(datumSpn, "dd.MM.yy"));
+        datumPanel.add(datumSpn);
 
         panel.add(klassePanel);
         panel.add(fachPanel);
@@ -106,48 +107,42 @@ public class NotenverwaltungView extends JFrame {
         return klasseTxt.getText();
     }
 
-    public String getFach() {
-        return fachTxt.getText();
-    }
-
-    public String getDatum() {
-        return datumTxt.getText();
-    }
-
     public void setKlasse(String klasse) {
         klasseTxt.setText(klasse);
+    }
+
+    public String getFach() {
+        return fachTxt.getText();
     }
 
     public void setFach(String fach) {
         fachTxt.setText(fach);
     }
 
-    public void setDatum(String datum) {
-        datumTxt.setText(datum);
+    public Date getDatum() {
+        return (Date) datumSpn.getValue();
     }
 
-    public List<Object> getNotenAnzahlen() {
-        List<Object> notenAnzahlen = new ArrayList<>();
-        for (JSpinner spinner : notenEingabe)
-        {
-            notenAnzahlen.add(spinner.getValue());
-        }
+    public void setDatum(Date datum) {
+        datumSpn.setValue(datum);
+    }
 
+    public List<Integer> getNotenAnzahlen() {
+        List<Integer> notenAnzahlen = new ArrayList<>();
+        for (JSpinner spinner : notenEingabe) {
+            notenAnzahlen.add((Integer) spinner.getValue());
+        }
         return notenAnzahlen;
     }
 
-
     public void setNotenAnzahlen(List<Integer> notenAnzahlen) {
-        for (int i = 0; i < notenEingabe.size(); i++)
-        {
+        for (int i = 0; i < notenEingabe.size(); i++) {
             notenEingabe.get(i).setValue(notenAnzahlen.get(i));
         }
     }
 
-    public void resetNotenEingabe()
-    {
-        for (JSpinner spinner : notenEingabe)
-        {
+    public void resetNotenEingabe() {
+        for (JSpinner spinner : notenEingabe) {
             spinner.setValue(0);
         }
     }
@@ -172,23 +167,6 @@ public class NotenverwaltungView extends JFrame {
         }
 
         return anzahl;
-    }
-
-    public double getDurchschnitt() {
-        int anzahl = getAnzahl();
-
-        if (anzahl == 0) {
-            return Double.NaN;
-        } else {
-            int summe = 0;
-
-            for (int i = 0; i < notenEingabe.size(); i++) {
-                int anzahlNote = (int) notenEingabe.get(i).getValue();
-                anzahl += anzahlNote;
-                summe += (i + 1) * anzahlNote;
-            }
-            return Math.round(10.0 * summe / anzahl) / 10.0;
-        }
     }
 
     public void setDurchschnitt(Double durchschnitt) {
